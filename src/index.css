@@ -1,0 +1,56 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap");
+@import "tailwindcss";
+
+@layer {
+  :root {
+    --color-primary: #c8a97e; /* Luxury Gold */
+    --color-secondary: #d4af37; /* Metallic Gold */
+    --color-background: #fdfbf7; /* Pearl White */
+    --color-text: #1a1a1a; /* Charcoal */
+  }
+}
+* {
+  font-family: Outfit, sans-serif;
+  scroll-behavior: smooth;
+}
+.font-playfair {
+  font-family: Playfair !important;
+}
+
+/* Glassmorphism Panel */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+
+/* Luxury Button */
+.btn-luxury {
+  background-color: #1a1a1a;
+  color: #fff;
+  transition: all 0.5s ease-out;
+  border: 1px solid transparent;
+}
+.btn-luxury:hover {
+  background-color: transparent;
+  color: #1a1a1a;
+  border-color: #1a1a1a;
+}
+
+/* Hero bg fade transition */
+.bg-fade-enter {
+  opacity: 0;
+}
+.bg-fade-enter-active {
+  opacity: 1;
+  transition: opacity 2s ease-in-out;
+}
+.bg-fade-exit {
+  opacity: 1;
+}
+.bg-fade-exit-active {
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+}
