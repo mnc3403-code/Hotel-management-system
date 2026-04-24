@@ -1,13 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap");
 @import "tailwindcss";
 
-@layer {
-  :root {
-    --color-primary: #c8a97e; /* Luxury Gold */
-    --color-secondary: #d4af37; /* Metallic Gold */
-    --color-background: #fdfbf7; /* Pearl White */
-    --color-text: #1a1a1a; /* Charcoal */
-  }
+@theme {
+  --color-primary: #c8a97e; /* Luxury Gold */
+  --color-secondary: #d4af37; /* Metallic Gold */
+  --color-background: #fdfbf7; /* Pearl White */
+  --color-text: #1a1a1a; /* Charcoal */
 }
 * {
   font-family: Outfit, sans-serif;
