@@ -93,7 +93,7 @@ export const exclusiveOffers = [
 export const testimonials = [
     { id: 1, name: "Sami Hasan", location: "Madrid, Spain", image: "src/assets/1234.jpeg", rating: 5, review: "I've used many booking platforms before, but none compare to the personalized experience and attention to detail that QuickStay provides.siuuuee!" },
     { id: 2, name:"Sadikun  Nabi", location: "New York, USA", image: userImg1, rating: 4, review: "QuickStay exceeded my expectations. The booking process was seamless, and the hotels were absolutely top-notch. Highly recommended this platform!" },
-    { id: 3, name: "Afsana Zaman Nipa", location: "Seoul, South Korea", image: "src/assets/5356.jpeg", rating: 5, review: "Amazing service! I always find the best luxury accommodations through QuickStay. Their recommendations never disappoint!" }
+    { id: 3, name: "Afsana Zaman", location: "Seoul, South Korea", image: "src/assets/5356.jpeg", rating: 5, review: "Amazing service! I always find the best luxury accommodations through QuickStay. Their recommendations never disappoint!" }
 ];
 
 // Facility Icon
