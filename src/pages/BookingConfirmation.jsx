@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { assets } from '../assets/assets'
+import { assets, resolveRoomImage } from '../assets/assets'
 import { useUser } from '@clerk/clerk-react'
 
 const BookingConfirmation = () => {
@@ -96,7 +96,7 @@ const BookingConfirmation = () => {
               {/* Room Image */}
               {booking.room_image && (
                 <div className='w-full md:w-48 h-36 rounded-xl overflow-hidden shadow-md flex-shrink-0'>
-                  <img src={booking.room_image} alt="Room" className='w-full h-full object-cover' />
+                  <img src={resolveRoomImage(booking.room_image)} alt="Room" className='w-full h-full object-cover' />
                 </div>
               )}
               <div className='flex-1'>

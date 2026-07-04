@@ -8,7 +8,9 @@ const Hero = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    navigate('/rooms');
+    const destinationInput = document.getElementById("destinationInput");
+    const destination = destinationInput ? destinationInput.value : "";
+    navigate('/rooms', { state: { destination } });
   }
   
   // Luxury Hero backgrounds

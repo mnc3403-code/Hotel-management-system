@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
-import { assets, facilityIcons, roomCommonData, roomsDummyData } from '../assets/assets';
+import { assets, facilityIcons, roomCommonData, roomsDummyData, resolveRoomImage } from '../assets/assets';
 import horizonLogo from '../assets/horizonLogo.png';
 import StarRating from '../component/StarRating';
 import { supabase } from '../supabase';
@@ -55,7 +55,7 @@ const RoomDetails  = () => {
       fetchRoom();
     }, [id]);
 
-    const mainImage = selectedImage || (room?.images ? room.images[0] : null);
+    const mainImage = resolveRoomImage(selectedImage) || (room?.images ? resolveRoomImage(room.images[0]) : null);
 
     const handleInitialBooking = (e) => {
       e.preventDefault();
@@ -118,7 +118,7 @@ const RoomDetails  = () => {
               hotel_name: room.hotels?.name || 'Hotel',
               hotel_address: room.hotels?.address || '',
               room_type: room.room_type || 'Room',
-              room_image: room.images?.[0] || null,
+              room_image: resolveRoomImage(room.images?.[0]) || null,
               check_in_date: bookingDetails.checkInDate,
               check_out_date: bookingDetails.checkOutDate,
               guests: parseInt(bookingDetails.guests),
@@ -188,7 +188,7 @@ const RoomDetails  = () => {
         <div className='grid grid-cols-2 gap-4 lg:w-1/2 w-full'>
           {room?.images?.length > 1 && room.images.map((image, index) => (
             <img onClick={()=>setSelectedImage(image)} 
-            key={index} src={image} alt="Room image" className={`w-full rounded-xl shadow-lg object-cover cursor-pointer ${mainImage === image ? 'outline-3 outline-orange-500' : ''}`}/>))}
+            key={index} src={resolveRoomImage(image)} alt="Room image" className={`w-full rounded-xl shadow-lg object-cover cursor-pointer ${mainImage === resolveRoomImage(image) ? 'outline-3 outline-orange-500' : ''}`}/>))}
         </div>
       </div>
       {/*Room Highlights */}

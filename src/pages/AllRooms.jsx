@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { assets, facilityIcons } from '../assets/assets'
-import { useNavigate } from 'react-router-dom'
+import { assets, facilityIcons, resolveRoomImage } from '../assets/assets'
+import { useNavigate, useLocation } from 'react-router-dom'
 import StarRating from '../component/StarRating'
 import { supabase } from '../supabase'
 
@@ -33,6 +33,8 @@ const RadioButton = ({ label, selected = false, onChange = () => {} }) => {
 
 const AllRoom = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const searchDestination = location.state?.destination || ''
   const [openFilters, setOpenFilters] = useState(false)
   const [rooms, setRooms] = useState([])
   const [loading, setLoading] = useState(true)
@@ -95,6 +97,10 @@ const AllRoom = () => {
 
   // Apply filters & sort
   const filteredRooms = rooms
+    .filter((r) => {
+      if (!searchDestination) return true
+      return r.hotels?.city?.toLowerCase() === searchDestination.toLowerCase()
+    })
     .filter((r) => {
       if (selectedTypes.length === 0) return true
       return selectedTypes.includes(r.room_type)
@@ -160,7 +166,7 @@ const AllRoom = () => {
                 ? room.images
                 : (() => { try { return JSON.parse(room.images) } catch { return [] } })()
             }
-            const firstImage = images[0] || null
+            const firstImage = resolveRoomImage(images[0]) || null
 
             return (
               <div

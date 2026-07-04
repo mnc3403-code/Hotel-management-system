@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Title from '../component/Title'
-import { assets } from '../assets/assets'
+import { assets, resolveRoomImage } from '../assets/assets'
 import { supabase } from '../supabase'
 import { useUser } from '@clerk/clerk-react'
 import toast from 'react-hot-toast'
@@ -119,7 +119,7 @@ const MyBookings = () => {
                 try { roomImages = JSON.parse(booking.rooms.images) } catch { roomImages = [] }
               }
             }
-            const firstImage = roomImages[0] || null
+            const firstImage = resolveRoomImage(roomImages[0]) || null
 
             return (
               <div

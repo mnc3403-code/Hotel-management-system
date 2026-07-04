@@ -316,3 +316,20 @@ const BookIcon = ()=>(
 )
 
 */
+
+export const resolveRoomImage = (img) => {
+    if (!img) return null;
+    // Handle both /src/assets/... and src/assets/... formats
+    const key = img.startsWith('/') ? img : '/' + img;
+    const localImageMap = {
+        "/src/assets/roomImg1.png": roomImg1,
+        "/src/assets/roomImg2.png": roomImg2,
+        "/src/assets/roomImg3.png": roomImg3,
+        "/src/assets/roomImg4.png": roomImg4,
+        "/src/assets/presidential_suite.png": presidentialSuiteImg,
+        "/src/assets/family_suite.png": familySuiteImg,
+        "/src/assets/presidential_suite_new.png": presidentialSuiteNewImg,
+        "/src/assets/family_suite_new.png": familySuiteNewImg,
+    };
+    return localImageMap[key] || localImageMap[img] || img;
+};
