@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react'
 import Navbar from './component/Navbar'
+import { Toaster } from 'react-hot-toast'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import Home from './pages/Home';
 import { Footer } from './component/Footer';
 import AllRooms from './pages/AllRooms';
 import RoomDetails from './pages/RoomDetails';
 import MyBookings from './pages/MyBookings';
+import BookingConfirmation from './pages/BookingConfirmation';
 import HotelReg from './component/HotelReg';
 import Layout from './pages/hotelOwner.jsx/Layout';
 import Dashboard from './pages/hotelOwner.jsx/Dashboard';
@@ -64,6 +66,7 @@ export const App = () => {
 
   return (
     <div>
+      <Toaster position="top-center" />
       {!isOwnerPath && <Navbar />}
       
       {shouldShowHotelReg && <HotelReg />}
@@ -80,6 +83,12 @@ export const App = () => {
           <Route path="/my-bookings" element={
             <ProtectedRoute>
               <MyBookings/>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/booking-confirmation" element={
+            <ProtectedRoute>
+              <BookingConfirmation/>
             </ProtectedRoute>
           } />
           

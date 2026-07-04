@@ -1,73 +1,236 @@
-import React from 'react'
-import { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Title from '../component/Title'
-import { assets, userBookingsDummyData } from '../assets/assets'
+import { assets } from '../assets/assets'
+import { supabase } from '../supabase'
+import { useUser } from '@clerk/clerk-react'
+import toast from 'react-hot-toast'
 
 const MyBookings = () => {
+  const { user } = useUser()
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const [bookings, setBookings] = useState(userBookingsDummyData)
+  useEffect(() => {
+    if (user) fetchBookings()
+  }, [user])
+
+  const fetchBookings = async () => {
+    setLoading(true)
+    try {
+      const email = user?.primaryEmailAddress?.emailAddress
+      if (!email) return
+
+      // Get the Supabase user record
+      const { data: dbUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .single()
+
+      if (!dbUser) {
+        // If DB user doesn't exist (RLS blocking), just load from local storage
+        const localBookings = JSON.parse(localStorage.getItem('local_bookings') || '[]');
+        setBookings(localBookings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+        setLoading(false);
+        return;
+      }
+
+      // Fetch bookings from localStorage (local fallback)
+      const localBookings = JSON.parse(localStorage.getItem('local_bookings') || '[]');
+      
+      try {
+        // Fetch bookings with room + hotel joined
+        const { data, error } = await supabase
+          .from('bookings')
+          .select(`
+            id,
+            check_in_date,
+            check_out_date,
+            total_price,
+            guests,
+            is_paid,
+            payment_status,
+            payment_method,
+            created_at,
+            rooms (
+              id,
+              room_type,
+              price_per_night,
+              images,
+              amenities
+            ),
+            hotels (
+              id,
+              name,
+              address,
+              city,
+              contact
+            )
+          `)
+          .eq('user_id', dbUser.id)
+          .order('created_at', { ascending: false })
+
+        if (error) {
+          console.error(error)
+          setBookings(localBookings)
+        } else {
+          // Combine DB bookings with local bookings
+          const combined = [...localBookings, ...(data || [])]
+          // Sort combined by created_at descending
+          combined.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          setBookings(combined)
+        }
+      } catch (err) {
+        console.error('Booking fetch error:', err)
+        setBookings(localBookings)
+      }
+      setLoading(false)
+    } catch (err) {
+      console.error('Outer fetch error:', err)
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className='py-28 md:pb-35 md:pt-32 px-4 md:px-16 lg:px-24 xl:px-32'>
+        <Title title='My Bookings' subtitle='View and manage your upcoming, current and past bookings.' align="left" />
+        <div className='flex items-center justify-center py-24'>
+          <div className='flex flex-col items-center gap-3'>
+            <div className='w-10 h-10 border-4 border-orange-400 border-t-transparent rounded-full animate-spin' />
+            <p className='text-gray-400 text-sm'>Loading your bookings...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className='py-28 md:pb-35 mb:pt-32 px-4 md:px-16 lg:px-24 xl:px-32'>
-
       <Title title='My Bookings' subtitle='View and manage your upcoming, current and past bookings.' align="left" />
 
-      <div>
-        <div className='hidden md:grid md:grid-cols-[3fr_2fr_1fr] w-full border-b border-gray-300 font-mediumm text-base py-3'>
-
-          <div className='w-1/3 '>HOTELS</div>
-          <div className='w-1/3'>Date & timings</div>
-          <div className='w-1/3 '>Payment</div>
+      {bookings.length === 0 ? (
+        <div className='text-center py-20 mt-8'>
+          <p className='text-6xl mb-4'>🏨</p>
+          <p className='text-2xl font-playfair text-gray-700 mb-2'>No bookings yet</p>
+          <p className='text-gray-400'>Your future bookings will appear here.</p>
         </div>
-        {bookings.map((booking) => (
-          <div key={booking._id} className='grid grid-cols-1 md:grid md:grid-cols-[3fr_2fr_1fr] w-full border-b border-gray-300 py-6 first-border-t'>
-            {/* Hotel  details  /> */}
-            <div className='flex flex-col md:flex-row'>
-              <img src={booking.room.images[0]} alt="hotel-img " className='min-md:w-44 rounded-shadow object-cover' />
-              <div className='flex flex-col gap-1.5 max-md:mt-3 min-md:ml-4'>
-                <p className='font-playfair text-2xl'>{booking.hotel.name}
-                  <span className='font-inter text-sm'> ({booking.room.roomType})</span>
-                </p>
-                <div className='flex items-center gap-1 text-sm text-gray-500'>
-                  <img src={assets.locationIcon} alt="location-icon" />
-                  <span>{booking.hotel.address}</span>
-                </div>
-                <div className='flex items-center gap-1 text-sm text-gray-500'>
-                  <img src={assets.guestsIcon} alt="guests-icon" />
-                  <span>{booking.guests} guests</span>
-                </div>
-                <p>Total : ${booking.totalPrice}</p>
-              </div>
-            </div>
-            {/* Date and time details  /> */}
-            <div className='flex flex-row md:items-center md:gap-12 mt-3 gap-8 '>
-              <div>
-                <p>Check-In</p>  
-                <p className='text-sm text-gray-500'>{new Date(booking.checkInDate).toDateString()}</p>
-              </div> 
-              <div>
-                <p>Check-Out</p>
-                <p className='text-sm text-gray-500'>{new Date(booking.checkOutDate).toDateString()}</p>
-              </div>
-            </div>
-            {/* Payment details  /> */}
-            <div className='flex flex-col items-start justify-center pt-3'>
-              <div className='flex items-center gap-2'>
-                <div className={`h-3 w-3 rounded-full ${booking.paymentStatus === 'paid' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <p className={`text-sm ${booking.paymentStatus === 'paid' ? 'text-green-500' : 'text-red-500'}`}>
-                  {booking.paymentStatus === 'paid' ? 'Paid' : 'UnPaid'}
-                </p>
-              </div>
-              {!booking.paymentStatus && (
-                <button className='px-4 py-1.5 mt-4 text-xs border border-gray-400 rounded-full hover: bg-gray-50 transition-all cursor-pointer'>Pay Now</button>
-              )}
-            </div>
+      ) : (
+        <div>
+          {/* Table header */}
+          <div className='hidden md:grid md:grid-cols-[3fr_2fr_1fr] w-full border-b border-gray-300 font-medium text-base py-3'>
+            <div>HOTELS</div>
+            <div>Date &amp; timings</div>
+            <div>Payment</div>
           </div>
-        ))}
-      </div>
+
+          {bookings.map((booking) => {
+            // Get room images from Supabase (stored as array or JSON array string)
+            let roomImages = []
+            if (booking.rooms?.images) {
+              if (Array.isArray(booking.rooms.images)) {
+                roomImages = booking.rooms.images
+              } else if (typeof booking.rooms.images === 'string') {
+                try { roomImages = JSON.parse(booking.rooms.images) } catch { roomImages = [] }
+              }
+            }
+            const firstImage = roomImages[0] || null
+
+            return (
+              <div
+                key={booking.id}
+                className='grid grid-cols-1 md:grid md:grid-cols-[3fr_2fr_1fr] w-full border-b border-gray-300 py-6'
+              >
+                {/* Hotel + Room details */}
+                <div className='flex flex-col md:flex-row gap-4'>
+                  {/* Room Image */}
+                  <div className='w-full md:w-44 h-36 md:h-32 flex-shrink-0 rounded-xl overflow-hidden shadow-md bg-gray-100'>
+                    {firstImage ? (
+                      <img
+                        src={firstImage}
+                        alt={booking.hotels?.name || 'Room'}
+                        className='w-full h-full object-cover'
+                        onError={(e) => {
+                          e.target.style.display = 'none'
+                          e.target.parentNode.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100"><span class="text-4xl">🏨</span></div>`
+                        }}
+                      />
+                    ) : (
+                      <div className='w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100'>
+                        <span className='text-4xl'>🏨</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Hotel info */}
+                  <div className='flex flex-col gap-1.5'>
+                    <p className='font-playfair text-2xl text-gray-900'>
+                      {booking.hotels?.name || 'Hotel'}
+                      <span className='font-inter text-sm text-gray-500 ml-1'>
+                        ({booking.rooms?.room_type || 'Room'})
+                      </span>
+                    </p>
+
+                    {booking.hotels?.address && (
+                      <div className='flex items-center gap-1 text-sm text-gray-500'>
+                        <img src={assets.locationIcon} alt="location" className='w-4 h-4' />
+                        <span>{booking.hotels.address}</span>
+                      </div>
+                    )}
+
+                    <div className='flex items-center gap-1 text-sm text-gray-500'>
+                      <img src={assets.guestsIcon} alt="guests" className='w-4 h-4' />
+                      <span>{booking.guests} guest{booking.guests !== 1 ? 's' : ''}</span>
+                    </div>
+
+                    <p className='font-medium text-gray-800 mt-1'>
+                      Total: <span className='text-orange-600'>${booking.total_price?.toLocaleString()}</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Date & time details */}
+                <div className='flex flex-row md:items-center md:gap-12 mt-3 gap-8'>
+                  <div>
+                    <p className='font-medium text-gray-700'>Check-In</p>
+                    <p className='text-sm text-gray-500 mt-0.5'>
+                      {new Date(booking.check_in_date).toDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className='font-medium text-gray-700'>Check-Out</p>
+                    <p className='text-sm text-gray-500 mt-0.5'>
+                      {new Date(booking.check_out_date).toDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Payment details */}
+                <div className='flex flex-col items-start justify-center pt-3'>
+                  <div className='flex items-center gap-2'>
+                    <div className={`h-3 w-3 rounded-full ${booking.is_paid ? 'bg-green-500' : 'bg-amber-400'}`} />
+                    <p className={`text-sm font-medium ${booking.is_paid ? 'text-green-600' : 'text-amber-600'}`}>
+                      {booking.is_paid ? 'Paid' : 'Unpaid'}
+                    </p>
+                  </div>
+
+                  {booking.payment_method && (
+                    <p className='text-xs text-gray-400 mt-1'>{booking.payment_method}</p>
+                  )}
+
+                  {!booking.is_paid && (
+                    <button className='px-4 py-1.5 mt-4 text-xs border border-gray-400 rounded-full hover:bg-gray-50 transition-all cursor-pointer'>
+                      Pay Now
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
-
 }
 
 export default MyBookings
