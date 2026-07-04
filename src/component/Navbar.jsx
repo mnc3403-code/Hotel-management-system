@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { assets } from "../assets/assets";
 import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabase";
 
 const BookIcon = () => (
      <svg className="w-4 h-4 text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" >
@@ -14,6 +15,7 @@ const Navbar = () => {
     const navLinks = [
         { name: 'Home', path: '/' },
         { name: 'Hotels', path: '/rooms' },
+        { name: 'Offers', path: '/offers' },
         { name: 'Experiences', path: '/experiences' },
         { name: 'About', path: '/about' },
     ];
@@ -24,6 +26,32 @@ const Navbar = () => {
     const { user } = useUser();
     const navigate= useNavigate()
     const location = useLocation();
+
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            // Save search to database if user is logged in
+            if (user) {
+                const email = user.primaryEmailAddress?.emailAddress;
+                if (email) {
+                    // Fetch current user data to append to array
+                    const { data } = await supabase.from('users').select('recent_searched_cities').eq('email', email).single();
+                    const currentSearches = data?.recent_searched_cities || [];
+                    if (!currentSearches.includes(searchQuery.trim())) {
+                        await supabase.from('users').update({
+                            recent_searched_cities: [...currentSearches, searchQuery.trim()].slice(-5) // Keep last 5
+                        }).eq('email', email);
+                    }
+                }
+            }
+            navigate(`/rooms?search=${encodeURIComponent(searchQuery.trim())}`);
+            setIsSearchOpen(false);
+            setSearchQuery("");
+        }
+    };
 
     useEffect(() => {
     const handleScroll = () => {
@@ -53,19 +81,33 @@ const Navbar = () => {
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-6 lg:gap-10">
                     {navLinks.map((link, i) => (
-                        <a key={i} href={link.path} className={`group flex flex-col items-center gap-1 ${isScrolled ? "text-[#1A1A1A]" : "text-white"} font-playfair tracking-[0.15em] uppercase text-xs font-semibold transition-colors`}>
+                        <Link key={i} to={link.path} className={`group flex flex-col items-center gap-1 ${isScrolled ? "text-[#1A1A1A]" : "text-white"} font-playfair tracking-[0.15em] uppercase text-xs font-semibold transition-colors`}>
                             {link.name}
                             <div className={`h-px w-0 group-hover:w-full transition-all duration-500 ${isScrolled ? "bg-[#C8A97E]" : "bg-[#C8A97E]"}`} />
-                        </a>
+                        </Link>
                     ))}
-                    <button className={`border px-6 py-2 text-xs tracking-[0.15em] uppercase font-semibold transition-all duration-500 ${isScrolled ? 'border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white' : 'border-white text-white hover:bg-white hover:text-black'}`} onClick={()=> navigate('/owner')}>
+                    {user && <button className={`border px-6 py-2 text-xs tracking-[0.15em] uppercase font-semibold transition-all duration-500 ${isScrolled ? 'border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white' : 'border-white text-white hover:bg-white hover:text-black'}`} onClick={()=> navigate('/owner')}>
                         Dashboard
-                    </button>
+                    </button>}
                 </div>
 
                 {/* Desktop Right */}
                 <div className="hidden md:flex items-center gap-6">
-                    <img src={assets.searchIcon} alt="Search" className={`${isScrolled  ? 'invert opacity-80' : 'opacity-100'} h-5 cursor-pointer hover:scale-110 transition-all duration-500`} />
+                    <div className="flex items-center relative">
+                        {isSearchOpen && (
+                            <form onSubmit={handleSearch} className="absolute right-8 top-1/2 -translate-y-1/2">
+                                <input 
+                                    type="text" 
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search rooms (e.g. single bed)"
+                                    className={`px-3 py-1 text-sm border-b focus:outline-none bg-transparent ${isScrolled ? 'border-gray-400 text-black placeholder-gray-500' : 'border-white/50 text-white placeholder-white/70'}`}
+                                    autoFocus
+                                />
+                            </form>
+                        )}
+                        <img onClick={() => setIsSearchOpen(!isSearchOpen)} src={assets.searchIcon} alt="Search" className={`${isScrolled  ? 'invert opacity-80' : 'opacity-100'} h-5 cursor-pointer hover:scale-110 transition-all duration-500`} />
+                    </div>
 
                     {user ? (<UserButton>
                         <UserButton.MenuItems>
@@ -97,9 +139,9 @@ const Navbar = () => {
                     </button>
 
                     {navLinks.map((link, i) => (
-                        <a key={i} href={link.path} onClick={() => setIsMenuOpen(false)} className="text-lg hover:text-[#C8A97E] transition-colors">
+                        <Link key={i} to={link.path} onClick={() => setIsMenuOpen(false)} className="text-lg hover:text-[#C8A97E] transition-colors">
                             {link.name}
-                        </a>
+                        </Link>
                     ))}
 
                   {user && 

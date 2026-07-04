@@ -1,13 +1,15 @@
 import React from 'react'
 import { assets, exclusiveOffers } from '../assets/assets'
 import Title from './Title'
+import { useNavigate } from 'react-router-dom'
 
 const ExclusiveOffer = () => {
+  const navigate = useNavigate();
   return (
     <div className='flex flex-col items-center px-6 md:px-16 lg:px-24 xl:px-32 pt-20 pb-30'>
         <div className='flex flex-col md:flex-row items-center justify-between w-full'>
             <Title align='left' title='Exclusive offer' subtitle='Discover our most popular destinations and find the perfect place for your next dream vacation' />
-                <button className='group flex items-center gap-2 font-medium cursor-pointer max-md:mt-12'>
+                <button onClick={() => navigate('/offers')} className='group flex items-center gap-2 font-medium cursor-pointer max-md:mt-12'>
                     view all offers
                     <img src={assets.arrowIcon} alt="arrow-icon"
                     className='group-hover:translate-x-1 transition-all' />
@@ -23,7 +25,7 @@ const ExclusiveOffer = () => {
                     <p>{item.description}</p>
                     <p className='text-xs text-white/70 mt-3'>Expires: {item.expiryDate}</p>
                   </div>
-                  <button className='flex items-center gap-2 font-medium cursor-pointer mt-4 mb-5'>
+                  <button onClick={() => navigate('/offers')} className='flex items-center gap-2 font-medium cursor-pointer mt-4 mb-5'>
                     view offer
                     <img className='invert group-hover:translate-x-1 transition-all' src={assets.arrowIcon} alt="arrow-icon" />
                   </button>
