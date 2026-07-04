@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { assets, facilityIcons } from '../assets/assets'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import StarRating from '../component/StarRating'
 import { supabase } from '../supabase'
+
 
 const CheckBox = ({ label, selected = false, onChange = () => {} }) => {
   return (
@@ -33,11 +34,14 @@ const RadioButton = ({ label, selected = false, onChange = () => {} }) => {
 
 const AllRoom = () => {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [openFilters, setOpenFilters] = useState(false)
   const [rooms, setRooms] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedTypes, setSelectedTypes] = useState([])
   const [selectedSort, setSelectedSort] = useState('')
+
+  const searchDestination = searchParams.get('destination') || ''
 
   const roomtypes = [
     'Single Bed',
@@ -95,6 +99,11 @@ const AllRoom = () => {
   // Apply filters & sort
   const filteredRooms = rooms
     .filter((r) => {
+      // Filter by destination (city)
+      if (searchDestination) {
+        const city = (r.hotels?.city || '').toLowerCase()
+        if (!city.includes(searchDestination.toLowerCase())) return false
+      }
       if (selectedTypes.length === 0) return true
       return selectedTypes.includes(r.room_type)
     })
@@ -115,9 +124,13 @@ const AllRoom = () => {
       {/* Rooms list */}
       <div className='flex-1'>
         <div className='flex flex-col items-start text-left'>
-          <h1 className='font-playfair text-4xl md:text-[40px]'>Hotel Rooms</h1>
+          <h1 className='font-playfair text-4xl md:text-[40px]'>
+            {searchDestination ? `Hotels in ${searchDestination}` : 'Hotel Rooms'}
+          </h1>
           <p className='text-base text-gray-500/90 mt-2 max-w-xl'>
-            Explore our variety of comfortable and well-appointed hotel rooms designed to provide you with a perfect stay.
+            {searchDestination
+              ? `Showing available rooms in ${searchDestination}. Adjust filters to refine your search.`
+              : 'Explore our variety of comfortable and well-appointed hotel rooms designed to provide you with a perfect stay.'}
           </p>
         </div>
 
