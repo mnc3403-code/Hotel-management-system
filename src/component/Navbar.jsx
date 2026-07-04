@@ -81,7 +81,7 @@ const Navbar = () => {
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-6 lg:gap-10">
                     {navLinks.map((link, i) => (
-                        <Link key={i} to={link.path} className={`group flex flex-col items-center gap-1 ${isScrolled ? "text-[#1A1A1A]" : "text-white"} font-playfair tracking-[0.15em] uppercase text-xs font-semibold transition-colors`}>
+                        <Link key={i} to={link.path} className={`group w-fit flex flex-col items-center gap-1 ${isScrolled ? "text-[#1A1A1A]" : "text-white"} font-playfair tracking-[0.15em] uppercase text-xs font-semibold transition-colors`}>
                             {link.name}
                             <div className={`h-px w-0 group-hover:w-full transition-all duration-500 ${isScrolled ? "bg-[#C8A97E]" : "bg-[#C8A97E]"}`} />
                         </Link>
@@ -100,8 +100,8 @@ const Navbar = () => {
                                     type="text" 
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search rooms (e.g. single bed)"
-                                    className={`px-3 py-1 text-sm border-b focus:outline-none bg-transparent ${isScrolled ? 'border-gray-400 text-black placeholder-gray-500' : 'border-white/50 text-white placeholder-white/70'}`}
+                                    placeholder=""
+                                    className={`w-52 px-3 py-1 text-sm border-b focus:outline-none bg-transparent ${isScrolled ? 'border-gray-400 text-black placeholder-gray-500' : 'border-white/50 text-white placeholder-white/70'}`}
                                     autoFocus
                                 />
                             </form>
