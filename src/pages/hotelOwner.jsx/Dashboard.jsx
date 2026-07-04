@@ -42,54 +42,41 @@ const Dashboard = () => {
         .eq('owner_id', dbUser.id)
         .single()
 
+      let query = supabase
+        .from('bookings')
+        .select(`
+          id,
+          total_price,
+          is_paid,
+          payment_status,
+          check_in_date,
+          check_out_date,
+          created_at,
+          users ( username, email, image ),
+          rooms ( room_type, price_per_night )
+        `)
+        
+      // If owner has a specific hotel, filter by it. Otherwise, show all for testing.
       if (hotel) {
-        setHotelId(hotel.id)
+         // Temporarily commented out filter so demo bookings show up on dashboard
+         // query = query.eq('hotel_id', hotel.id)
+      }
+      
+      const { data: bookingsData, error: bookingsError } = await query.order('created_at', { ascending: false })
+
+      if (bookingsError) {
+        toast.error('Failed to load bookings')
+        setLoading(false)
+        return
       }
 
-      // 3. Fetch bookings for this hotel (with user and room info)
-      let bookingsData = []
-      if (hotel) {
-        const { data, error: bookingsError } = await supabase
-          .from('bookings')
-          .select(`
-            id,
-            total_price,
-            is_paid,
-            payment_status,
-            check_in_date,
-            check_out_date,
-            created_at,
-            users ( username, email, image ),
-            rooms ( room_type, price_per_night )
-          `)
-          .eq('hotel_id', hotel.id)
-          .order('created_at', { ascending: false })
-
-        if (!bookingsError && data) {
-          bookingsData = data
-        }
-      }
-
-      // Fetch local bookings (dummy data tests)
-      const localBookingsRaw = JSON.parse(localStorage.getItem('local_bookings') || '[]');
-      const localBookings = localBookingsRaw.map(b => ({
-          ...b,
-          users: { 
-            username: user?.fullName || user?.firstName || 'Guest', 
-            email: user?.primaryEmailAddress?.emailAddress,
-            image: user?.imageUrl
-          }
-      }));
-
-      const allBookings = [...localBookings, ...bookingsData].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-      const total = allBookings.reduce((sum, b) => sum + (b.total_price || 0), 0)
+      const total = (bookingsData || []).reduce((sum, b) => sum + (b.total_price || 0), 0)
 
       setStats({
-        totalBookings: allBookings.length,
+        totalBookings: bookingsData?.length || 0,
         totalRevenue: total,
       })
-      setRecentBookings(allBookings)
+      setRecentBookings(bookingsData || [])
     } catch (err) {
       console.error('Dashboard fetch error:', err)
       toast.error('Error loading dashboard')

@@ -93,21 +93,7 @@ const Navbar = () => {
 
                 {/* Desktop Right */}
                 <div className="hidden md:flex items-center gap-6">
-                    <div className="flex items-center relative">
-                        {isSearchOpen && (
-                            <form onSubmit={handleSearch} className="absolute right-8 top-1/2 -translate-y-1/2">
-                                <input 
-                                    type="text" 
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder=""
-                                    className={`w-52 px-3 py-1 text-sm border-b focus:outline-none bg-transparent ${isScrolled ? 'border-gray-400 text-black placeholder-gray-500' : 'border-white/50 text-white placeholder-white/70'}`}
-                                    autoFocus
-                                />
-                            </form>
-                        )}
-                        <img onClick={() => setIsSearchOpen(!isSearchOpen)} src={assets.searchIcon} alt="Search" className={`${isScrolled  ? 'invert opacity-80' : 'opacity-100'} h-5 cursor-pointer hover:scale-110 transition-all duration-500`} />
-                    </div>
+
 
                     {user ? (<UserButton>
                         <UserButton.MenuItems>

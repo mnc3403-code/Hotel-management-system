@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { assets, cities } from '../assets/assets'
 
 const Hero = () => {
-  const navigate = useNavigate();
   const [currentImage] = useState(0);
-  const [destination, setDestination] = useState('');
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
-  const [guests, setGuests] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    navigate('/rooms');
+  }
   
   // Luxury Hero backgrounds
   const bgImages = [
@@ -24,17 +25,6 @@ const Hero = () => {
     // }, 6000); // Change image every 6 seconds for a slow, premium feel
     // return () => clearInterval(intervalId);
   }, []);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (destination) params.set('destination', destination);
-    if (checkIn) params.set('checkIn', checkIn);
-    if (checkOut) params.set('checkOut', checkOut);
-    if (guests) params.set('guests', guests);
-    navigate(`/rooms?${params.toString()}`);
-    window.scrollTo(0, 0);
-  };
 
   return (
     <div className="relative flex flex-col items-start justify-center px-6 md:px-16 lg:px-24 xl:px-32 text-white h-screen overflow-hidden">
@@ -79,7 +69,7 @@ const Hero = () => {
                     ))}
                   </datalist>
               </div>
-              <input list='destinations' id="destinationInput" type="text" value={destination} onChange={(e) => setDestination(e.target.value)} className="w-full bg-transparent border-b border-gray-300 pb-2 text-lg text-gray-800 outline-none placeholder-gray-400 focus:border-[#C8A97E] transition-colors" placeholder="Where to?" required />
+              <input list='destinations' id="destinationInput" type="text" className="w-full bg-transparent border-b border-gray-300 pb-2 text-lg text-gray-800 outline-none placeholder-gray-400 focus:border-[#C8A97E] transition-colors" placeholder="Where to?" required />
           </div>
 
           <div className="flex-1 w-full">
@@ -87,7 +77,7 @@ const Hero = () => {
                     <img src={assets.calenderIcon} alt="" className='h-4 opacity-70 grayscale'/>
                   <label htmlFor="checkIn" className="font-playfair text-sm tracking-widest uppercase text-gray-600 font-semibold">Check In</label>
               </div>
-              <input id="checkIn" type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="w-full bg-transparent border-b border-gray-300 pb-2 text-lg text-gray-800 outline-none focus:border-[#C8A97E] transition-colors" />
+              <input id="checkIn" type="date" className="w-full bg-transparent border-b border-gray-300 pb-2 text-lg text-gray-800 outline-none focus:border-[#C8A97E] transition-colors" />
           </div>
 
           <div className="flex-1 w-full">
@@ -95,7 +85,7 @@ const Hero = () => {
                   <img src={assets.calenderIcon} alt="" className='h-4 opacity-70 grayscale'/>
                   <label htmlFor="checkOut" className="font-playfair text-sm tracking-widest uppercase text-gray-600 font-semibold">Check Out</label>
               </div>
-              <input id="checkOut" type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className="w-full bg-transparent border-b border-gray-300 pb-2 text-lg text-gray-800 outline-none focus:border-[#C8A97E] transition-colors" />
+              <input id="checkOut" type="date" className="w-full bg-transparent border-b border-gray-300 pb-2 text-lg text-gray-800 outline-none focus:border-[#C8A97E] transition-colors" />
           </div>
 
           <div className="w-full md:w-32">
@@ -103,10 +93,10 @@ const Hero = () => {
                   <img src={assets.guestsIcon} alt="" className='h-4 opacity-70 grayscale'/>
                   <label htmlFor="guests" className="font-playfair text-sm tracking-widest uppercase text-gray-600 font-semibold">Guests</label>
               </div>
-              <input min={1} max={4} id="guests" type="number" value={guests} onChange={(e) => setGuests(e.target.value)} className="w-full bg-transparent border-b border-gray-300 pb-2 text-lg text-gray-800 outline-none focus:border-[#C8A97E] transition-colors" placeholder="0" />
+              <input min={1} max={4} id="guests" type="number" className="w-full bg-transparent border-b border-gray-300 pb-2 text-lg text-gray-800 outline-none focus:border-[#C8A97E] transition-colors" placeholder="0" />
           </div>
 
-          <button type="submit" className='flex mt-4 md:mt-0 items-center justify-center rounded-xl bg-[#C8A97E] hover:bg-[#D4AF37] transition-all duration-500 py-4 px-10 text-white cursor-pointer max-md:w-full shadow-lg hover:shadow-xl' >
+          <button type="submit" className='flex mt-4 md:mt-0 items-center justify-center gap-2 rounded-xl bg-[#C8A97E] hover:bg-[#D4AF37] transition-all duration-500 py-4 px-10 text-white cursor-pointer max-md:w-full shadow-lg hover:shadow-xl' >
               <span className="font-semibold tracking-wide">Search</span>
           </button>
         </form>

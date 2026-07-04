@@ -27,6 +27,10 @@ import roomImg1 from './roomImg1.png'
 import roomImg2 from './roomImg2.png'
 import roomImg3 from './roomImg3.png'
 import roomImg4 from './roomImg4.png'
+import presidentialSuiteImg from './presidential_suite.png'
+import familySuiteImg from './family_suite.png'
+import presidentialSuiteNewImg from './presidential_suite_new.png'
+import familySuiteNewImg from './family_suite_new.png'
 import regImage from './regImage.png'
 import exclusiveOfferCardImg1 from "./exclusiveOfferCardImg1.png";
 import exclusiveOfferCardImg2 from "./exclusiveOfferCardImg2.png";
@@ -143,6 +147,54 @@ export const hotelDummyData = {
 
 // Rooms Dummy Data
 export const roomsDummyData = [
+    {
+        "_id": "67f76555197ac559e4089c10",
+        "hotel": hotelDummyData,
+        "roomType": "Presidential Suite",
+        "pricePerNight": 1299,
+        "amenities": ["Free WiFi", "Free Breakfast", "Room Service", "Pool Access", "Mountain View"],
+        "images": [presidentialSuiteImg, roomImg4, roomImg2, roomImg3],
+        "isAvailable": true,
+        "createdAt": "2026-04-10T06:28:00.000Z",
+        "updatedAt": "2026-04-10T06:28:00.000Z",
+        "__v": 0
+    },
+    {
+        "_id": "67f76555197ac559e4089c12",
+        "hotel": hotelDummyData,
+        "roomType": "Presidential Suite",
+        "pricePerNight": 1499,
+        "amenities": ["Free WiFi", "Free Breakfast", "Room Service", "Pool Access", "Mountain View"],
+        "images": [presidentialSuiteNewImg, roomImg4, roomImg2, roomImg3],
+        "isAvailable": true,
+        "createdAt": "2026-04-10T06:28:30.000Z",
+        "updatedAt": "2026-04-10T06:28:30.000Z",
+        "__v": 0
+    },
+    {
+        "_id": "67f76533197ac559e4089c05",
+        "hotel": hotelDummyData,
+        "roomType": "Family Suite",
+        "pricePerNight": 599,
+        "amenities": ["Free WiFi", "Free Breakfast", "Room Service", "Pool Access"],
+        "images": [familySuiteImg, roomImg2, roomImg1, roomImg4],
+        "isAvailable": true,
+        "createdAt": "2026-04-10T06:27:00.000Z",
+        "updatedAt": "2026-04-10T06:27:00.000Z",
+        "__v": 0
+    },
+    {
+        "_id": "67f76533197ac559e4089c07",
+        "hotel": hotelDummyData,
+        "roomType": "Family Suite",
+        "pricePerNight": 699,
+        "amenities": ["Free WiFi", "Free Breakfast", "Room Service", "Pool Access"],
+        "images": [familySuiteNewImg, roomImg2, roomImg1, roomImg4],
+        "isAvailable": true,
+        "createdAt": "2026-04-10T06:27:30.000Z",
+        "updatedAt": "2026-04-10T06:27:30.000Z",
+        "__v": 0
+    },
     {
         "_id": "67f7647c197ac559e4089b96",
         "hotel": hotelDummyData,

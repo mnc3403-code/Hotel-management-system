@@ -28,65 +28,50 @@ const MyBookings = () => {
         .single()
 
       if (!dbUser) {
-        // If DB user doesn't exist (RLS blocking), just load from local storage
-        const localBookings = JSON.parse(localStorage.getItem('local_bookings') || '[]');
-        setBookings(localBookings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
-        setLoading(false);
-        return;
+        setLoading(false)
+        return
       }
 
-      // Fetch bookings from localStorage (local fallback)
-      const localBookings = JSON.parse(localStorage.getItem('local_bookings') || '[]');
-      
-      try {
-        // Fetch bookings with room + hotel joined
-        const { data, error } = await supabase
-          .from('bookings')
-          .select(`
+      // Fetch bookings with room + hotel joined
+      const { data, error } = await supabase
+        .from('bookings')
+        .select(`
+          id,
+          check_in_date,
+          check_out_date,
+          total_price,
+          guests,
+          is_paid,
+          payment_status,
+          payment_method,
+          created_at,
+          rooms (
             id,
-            check_in_date,
-            check_out_date,
-            total_price,
-            guests,
-            is_paid,
-            payment_status,
-            payment_method,
-            created_at,
-            rooms (
-              id,
-              room_type,
-              price_per_night,
-              images,
-              amenities
-            ),
-            hotels (
-              id,
-              name,
-              address,
-              city,
-              contact
-            )
-          `)
-          .eq('user_id', dbUser.id)
-          .order('created_at', { ascending: false })
+            room_type,
+            price_per_night,
+            images,
+            amenities
+          ),
+          hotels (
+            id,
+            name,
+            address,
+            city,
+            contact
+          )
+        `)
+        .eq('user_id', dbUser.id)
+        .order('created_at', { ascending: false })
 
-        if (error) {
-          console.error(error)
-          setBookings(localBookings)
-        } else {
-          // Combine DB bookings with local bookings
-          const combined = [...localBookings, ...(data || [])]
-          // Sort combined by created_at descending
-          combined.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-          setBookings(combined)
-        }
-      } catch (err) {
-        console.error('Booking fetch error:', err)
-        setBookings(localBookings)
+      if (error) {
+        toast.error('Failed to load bookings')
+        console.error(error)
+      } else {
+        setBookings(data || [])
       }
-      setLoading(false)
     } catch (err) {
-      console.error('Outer fetch error:', err)
+      console.error('Booking fetch error:', err)
+    } finally {
       setLoading(false)
     }
   }

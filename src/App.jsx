@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import Navbar from './component/Navbar'
-import { Toaster } from 'react-hot-toast'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import Home from './pages/Home';
 import { Footer } from './component/Footer';
@@ -66,7 +65,6 @@ export const App = () => {
 
   return (
     <div>
-      <Toaster position="top-center" />
       {!isOwnerPath && <Navbar />}
       
       {shouldShowHotelReg && <HotelReg />}

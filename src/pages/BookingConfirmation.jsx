@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import { useUser } from '@clerk/clerk-react'
-import { jsPDF } from 'jspdf'
 
 const BookingConfirmation = () => {
   const location = useLocation()
@@ -42,160 +41,8 @@ const BookingConfirmation = () => {
 
   const bookingId = booking.id?.slice(0, 8).toUpperCase() || 'N/A'
 
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF()
-    const pageWidth = doc.internal.pageSize.getWidth()
-    
-    // Colors
-    const primaryColor = [34, 139, 34]   // Forest green
-    const darkColor = [33, 33, 33]
-    const grayColor = [120, 120, 120]
-    const lightGray = [200, 200, 200]
-    
-    // Header background
-    doc.setFillColor(...primaryColor)
-    doc.rect(0, 0, pageWidth, 50, 'F')
-    
-    // Hotel name / Title
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(24)
-    doc.setFont('helvetica', 'bold')
-    doc.text('Booking Confirmation', pageWidth / 2, 22, { align: 'center' })
-    
-    // Booking ID
-    doc.setFontSize(12)
-    doc.setFont('helvetica', 'normal')
-    doc.text(`Booking ID: #${bookingId}`, pageWidth / 2, 35, { align: 'center' })
-    
-    // Hotel name
-    doc.setTextColor(...darkColor)
-    doc.setFontSize(18)
-    doc.setFont('helvetica', 'bold')
-    doc.text(booking.hotel_name || 'Hotel', pageWidth / 2, 68, { align: 'center' })
-    
-    // Room type
-    doc.setFontSize(11)
-    doc.setTextColor(...grayColor)
-    doc.setFont('helvetica', 'normal')
-    doc.text(booking.room_type || 'Room', pageWidth / 2, 76, { align: 'center' })
-    
-    // Divider line
-    doc.setDrawColor(...lightGray)
-    doc.setLineWidth(0.5)
-    doc.line(20, 84, pageWidth - 20, 84)
-    
-    // Guest Details Section
-    let yPos = 96
-    
-    doc.setFontSize(13)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...primaryColor)
-    doc.text('Guest Details', 20, yPos)
-    yPos += 12
-    
-    // Name
-    doc.setFontSize(11)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...darkColor)
-    doc.text('Name:', 20, yPos)
-    doc.setFont('helvetica', 'normal')
-    doc.text(user?.fullName || user?.firstName || 'Guest', 65, yPos)
-    yPos += 10
-    
-    // Phone Number
-    doc.setFont('helvetica', 'bold')
-    doc.text('Phone Number:', 20, yPos)
-    doc.setFont('helvetica', 'normal')
-    doc.text(booking.phone_number || 'N/A', 65, yPos)
-    yPos += 10
-    
-    // Email
-    doc.setFont('helvetica', 'bold')
-    doc.text('Email:', 20, yPos)
-    doc.setFont('helvetica', 'normal')
-    doc.text(user?.primaryEmailAddress?.emailAddress || 'N/A', 65, yPos)
-    yPos += 16
-    
-    // Divider
-    doc.setDrawColor(...lightGray)
-    doc.line(20, yPos, pageWidth - 20, yPos)
-    yPos += 14
-    
-    // Stay Details Section
-    doc.setFontSize(13)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...primaryColor)
-    doc.text('Stay Details', 20, yPos)
-    yPos += 12
-    
-    // Check-In
-    doc.setFontSize(11)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...darkColor)
-    doc.text('Check-In:', 20, yPos)
-    doc.setFont('helvetica', 'normal')
-    doc.text(formatDate(checkIn), 65, yPos)
-    yPos += 10
-    
-    // Check-Out
-    doc.setFont('helvetica', 'bold')
-    doc.text('Check-Out:', 20, yPos)
-    doc.setFont('helvetica', 'normal')
-    doc.text(formatDate(checkOut), 65, yPos)
-    yPos += 10
-    
-    // Duration
-    doc.setFont('helvetica', 'bold')
-    doc.text('Duration:', 20, yPos)
-    doc.setFont('helvetica', 'normal')
-    doc.text(`${nights} Night${nights > 1 ? 's' : ''}`, 65, yPos)
-    yPos += 10
-    
-    // Guests
-    doc.setFont('helvetica', 'bold')
-    doc.text('Guests:', 20, yPos)
-    doc.setFont('helvetica', 'normal')
-    doc.text(`${booking.guests} Guest${booking.guests > 1 ? 's' : ''}`, 65, yPos)
-    yPos += 16
-    
-    // Divider
-    doc.setDrawColor(...lightGray)
-    doc.line(20, yPos, pageWidth - 20, yPos)
-    yPos += 14
-    
-    // Payment info
-    doc.setFontSize(13)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...primaryColor)
-    doc.text('Payment Info', 20, yPos)
-    yPos += 12
-    
-    doc.setFontSize(11)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...darkColor)
-    doc.text('Total Price:', 20, yPos)
-    doc.setFont('helvetica', 'normal')
-    doc.text(`$${booking.total_price?.toLocaleString()}`, 65, yPos)
-    yPos += 10
-    
-    doc.setFont('helvetica', 'bold')
-    doc.text('Status:', 20, yPos)
-    doc.setFont('helvetica', 'normal')
-    doc.text('Pay at Hotel', 65, yPos)
-    yPos += 20
-    
-    // Footer
-    doc.setDrawColor(...lightGray)
-    doc.line(20, yPos, pageWidth - 20, yPos)
-    yPos += 10
-    doc.setFontSize(9)
-    doc.setTextColor(...grayColor)
-    doc.text('Thank you for your booking! We look forward to welcoming you.', pageWidth / 2, yPos, { align: 'center' })
-    yPos += 6
-    doc.text(`Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`, pageWidth / 2, yPos, { align: 'center' })
-    
-    // Save the PDF
-    doc.save(`Booking_${bookingId}.pdf`)
+  const handlePrint = () => {
+    window.print()
   }
 
   return (
@@ -238,7 +85,7 @@ const BookingConfirmation = () => {
             <div className='flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2'>
               <div className='w-2 h-2 rounded-full bg-white animate-pulse' />
               <span className='text-white text-sm font-medium'>
-                Pay at Hotel
+                {booking.is_paid ? 'Paid' : 'Pay at Hotel'}
               </span>
             </div>
           </div>
@@ -329,8 +176,8 @@ const BookingConfirmation = () => {
               <div>
                 <p className='text-sm font-semibold text-gray-800'>{user?.fullName || user?.firstName || 'Guest'}</p>
                 <p className='text-xs text-gray-400'>{user?.primaryEmailAddress?.emailAddress}</p>
-                {booking.phone_number && (
-                  <p className='text-xs text-gray-400'>Phone: {booking.phone_number}</p>
+                {(booking.phone_number || user?.primaryPhoneNumber?.phoneNumber) && (
+                  <p className='text-xs text-gray-400'>Phone: {booking.phone_number || user?.primaryPhoneNumber?.phoneNumber}</p>
                 )}
               </div>
             </div>
@@ -345,9 +192,13 @@ const BookingConfirmation = () => {
                 <span className='text-gray-700 font-medium'>${booking.total_price?.toLocaleString()}</span>
               </div>
               <div className='flex justify-between items-center text-sm'>
+                <span className='text-gray-500'>Payment Method</span>
+                <span className='text-gray-700 font-medium'>{booking.payment_method}</span>
+              </div>
+              <div className='flex justify-between items-center text-sm'>
                 <span className='text-gray-500'>Payment Status</span>
-                <span className='font-semibold text-amber-500'>
-                  ⏳ Pay at Hotel
+                <span className={`font-semibold ${booking.is_paid ? 'text-green-600' : 'text-amber-500'}`}>
+                  {booking.is_paid ? '✓ Paid' : '⏳ Pay at Hotel'}
                 </span>
               </div>
               <div className='border-t border-dashed border-gray-200 pt-3 mt-3 flex justify-between items-center'>
@@ -366,13 +217,13 @@ const BookingConfirmation = () => {
               View All Bookings
             </Link>
             <button
-              onClick={handleDownloadPDF}
-              className='flex-1 text-center py-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all font-medium text-sm flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer'
+              onClick={handlePrint}
+              className='flex-1 text-center py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-all font-medium text-sm flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer'
             >
               <svg className='w-4 h-4' fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
               </svg>
-              Download PDF
+              Print Receipt
             </button>
             <Link
               to='/rooms'

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { assets, facilityIcons } from '../assets/assets'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import StarRating from '../component/StarRating'
 import { supabase } from '../supabase'
-
 
 const CheckBox = ({ label, selected = false, onChange = () => {} }) => {
   return (
@@ -34,14 +33,12 @@ const RadioButton = ({ label, selected = false, onChange = () => {} }) => {
 
 const AllRoom = () => {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
   const [openFilters, setOpenFilters] = useState(false)
   const [rooms, setRooms] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedTypes, setSelectedTypes] = useState([])
+  const [selectedPrices, setSelectedPrices] = useState([])
   const [selectedSort, setSelectedSort] = useState('')
-
-  const searchDestination = searchParams.get('destination') || ''
 
   const roomtypes = [
     'Single Bed',
@@ -99,13 +96,19 @@ const AllRoom = () => {
   // Apply filters & sort
   const filteredRooms = rooms
     .filter((r) => {
-      // Filter by destination (city)
-      if (searchDestination) {
-        const city = (r.hotels?.city || '').toLowerCase()
-        if (!city.includes(searchDestination.toLowerCase())) return false
-      }
       if (selectedTypes.length === 0) return true
       return selectedTypes.includes(r.room_type)
+    })
+    .filter((r) => {
+      if (selectedPrices.length === 0) return true
+      return selectedPrices.some((priceRange) => {
+        if (priceRange === '$0 to 500') return r.price_per_night >= 0 && r.price_per_night <= 500;
+        if (priceRange === '$500 to 1000') return r.price_per_night > 500 && r.price_per_night <= 1000;
+        if (priceRange === '$1000 to 2000') return r.price_per_night > 1000 && r.price_per_night <= 2000;
+        if (priceRange === '$2000 to 3000') return r.price_per_night > 2000 && r.price_per_night <= 3000;
+        if (priceRange === '$3000+') return r.price_per_night > 3000;
+        return false;
+      })
     })
     .sort((a, b) => {
       if (selectedSort === 'Price: Low to High') return a.price_per_night - b.price_per_night
@@ -119,18 +122,20 @@ const AllRoom = () => {
     )
   }
 
+  const togglePrice = (checked, label) => {
+    setSelectedPrices((prev) =>
+      checked ? [...prev, label] : prev.filter((p) => p !== label)
+    )
+  }
+
   return (
     <div className='flex flex-col-reverse lg:flex-row items-start justify-between pt-28 md:pt-35 px-4 md:px-16 lg:px-24 xl:px-32'>
       {/* Rooms list */}
       <div className='flex-1'>
         <div className='flex flex-col items-start text-left'>
-          <h1 className='font-playfair text-4xl md:text-[40px]'>
-            {searchDestination ? `Hotels in ${searchDestination}` : 'Hotel Rooms'}
-          </h1>
+          <h1 className='font-playfair text-4xl md:text-[40px]'>Hotel Rooms</h1>
           <p className='text-base text-gray-500/90 mt-2 max-w-xl'>
-            {searchDestination
-              ? `Showing available rooms in ${searchDestination}. Adjust filters to refine your search.`
-              : 'Explore our variety of comfortable and well-appointed hotel rooms designed to provide you with a perfect stay.'}
+            Explore our variety of comfortable and well-appointed hotel rooms designed to provide you with a perfect stay.
           </p>
         </div>
 
@@ -240,7 +245,7 @@ const AllRoom = () => {
             </span>
             <span
               className='hidden lg:block text-red-400 hover:text-red-600'
-              onClick={() => { setSelectedTypes([]); setSelectedSort('') }}
+              onClick={() => { setSelectedTypes([]); setSelectedPrices([]); setSelectedSort('') }}
             >
               CLEAR ALL
             </span>
@@ -263,7 +268,12 @@ const AllRoom = () => {
           <div className='px-5 pt-5'>
             <p className='font-medium text-gray-800 pb-2'>Price Range</p>
             {priceRanges.map((range, index) => (
-              <CheckBox key={index} label={`$${range}`} />
+              <CheckBox 
+                key={index} 
+                label={`$${range}`} 
+                selected={selectedPrices.includes(`$${range}`)}
+                onChange={togglePrice}
+              />
             ))}
           </div>
 
